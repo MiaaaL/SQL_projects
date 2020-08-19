@@ -5,84 +5,144 @@
 \paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
 \pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
 
-\f0\b\fs24 \cf0 ##Which actors have the first name \'91Scarlett\'92?
+\f0\b\fs24 \cf0 ##Which actors have the first name \'91Scarlett\'92?\
+
 \b0 \
-\
 SELECT * FROM actor\
 WHERE first_name = 'Scarlett';\
 \
 
-\b ##Which actors have the last name \'91Johansson\'92?
+\b \
+##Which actors have the last name \'91Johansson\'92?
 \b0 \
 \
 SELECT * FROM actor\
 WHERE last_name = 'Johansson';\
 \
 
-\b ##How many distinct actors last names are there?
+\b \
+##How many distinct actors last names are there?
 \b0 \
 \
 SELECT COUNT(distinct(last_name)) \
 FROM actor;\
-\
 
-\b ##Which last names appear more than once?\
-
+\b \
+##Which last names appear more than once?
 \b0 \
+\
 SELECT last_name, COUNT(last_name)\
 FROM actor\
 GROUP BY last_name\
 HAVING COUNT(last_name) >1\
 ORDER BY COUNT(last_name) DESC;\
-\
 
-\b ##How many total rentals occurred in May?
+\b \
+##How many total rentals occurred in May?
 \b0 \
 \
-SELECT COUNT(rental_id)\
+SELECT COUNT(distinct(rental_id))\
 FROM rental\
 WHERE rental_date LIKE '2005-05-%' ;\
 \
 
-\b ##How many staff processed rentals in May?\
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
-\cf0 ##How many staffs processed rentals in May?\
+\b \
+##How many staff processed rentals in May?\
+##How many staffs processed rentals in May?
+\b0 \
+\
+SELECT count(distinct(staff_id))\
+FROM rental\
+WHERE rental_date LIKE '2005-05-%';\
 \
 
-\b0 SELECT count(distinct(staff_id))\
-FROM rental\
-WHERE rental_date LIKE '2005-05-%'\
-\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
-\cf0 \
-
-\b ##Which staff processed the most rentals in May?\
-
+\b \
+##Which staff processed the most rentals in May?
 \b0 \
+\
 SELECT rental.staff_id, staff.last_name, staff.first_name, COUNT(distinct(rental_id))\
 FROM rental\
 INNER JOIN staff\
 ON rental.staff_id = staff.staff_id\
 GROUP BY rental.staff_id\
 ORDER BY COUNT(rental_id) DESC\
-LIMIT 1\
+LIMIT 1;\
 \
 
-\b ##Which customer paid the most rental in August?\
-
+\b \
+##Which customer paid the most rental in August?
 \b0 \
-SELECT payment.customer_id, customer.last_name, customer.first_name, COUNT(payment.payment_id) AS 'Total number of rental',SUM(payment.amount) AS 'Sum of all payment'\
+\
+SELECT payment.customer_id, customer.last_name, customer.first_name, COUNT(payment.payment_id) AS 'Total number of rental',SUM(payment.amount) AS 'Total rental payment'\
 FROM payment\
 INNER JOIN customer\
 ON payment.customer_id = customer.customer_id\
 WHERE payment.payment_date LIKE '2005-08-%'\
 GROUP BY payment.customer_id\
 ORDER BY SUM(payment.amount) DESC\
-LIMIT 1\
+Limit 1;\
 \
 
-\b ##A summary of rental total amount by month.\
+\b \
+##A summary of rental total amount by month.
+\b0 \
 \
-
-\b0 SELECT MONTH(payment_date), YEAR(payment_date), SUM(amount) \
+SELECT MONTH(payment_date), YEAR(payment_date), SUM(amount) \
 FROM PAYMENT\
-GROUP BY MONTH(payment_date), YEAR(payment_date)}
+GROUP BY MONTH(payment_date), YEAR(payment_date);\
+\
+
+\b \
+## Which actor has appeared in the most films? use SET keywords
+\b0 \
+\
+SELECT film_actor.actor_id, actor.first_name, actor.last_name, COUNT(distinct(film_id)) AS '# of films' from film_actor\
+LEFT JOIN actor\
+ON film_actor.actor_id = actor.actor_id\
+GROUP BY film_actor.actor_id\
+ORDER BY count(distinct(film_id)) DESC\
+LIMIT 1;\
+\
+
+\b \
+## Use JOIN to display the first and last names, as well as the address, of each staff member. Use the tables staff and address.
+\b0 \
+\
+SELECT staff.first_name, staff.last_name, address.address\
+FROM staff\
+LEFT JOIN address\
+ON staff.address_id = address.address_id; \
+\
+
+\b \
+## List each film and the number of actors who are listed for that film. Use tables film_actor and film. Use inner join.
+\b0 \
+\
+SELECT title, COUNT(actor_id) AS 'The # of actors'\
+FROM film\
+INNER JOIN film_actor\
+ON film.film_id = film_actor.film_id\
+GROUP BY title\
+ORDER BY 2 DESC;\
+
+\b \
+## How many copies of the film Hunchback Impossible exist in the inventory system?
+\b0 \
+\
+SELECT film.title, film.film_id, COUNT(inventory_id) AS 'Copies of the film'\
+FROM inventory\
+JOIN film\
+ON inventory.film_id = film.film_id\
+Where film.title = 'hunchback impossible'\
+GROUP BY film.film_id;\
+\
+
+\b ## Using the tables payment and customer and the JOIN command, list the total paid by each customer. List the customers alphabetically by last name:
+\b0 \
+\
+SELECT last_name, first_name, customer.customer_id, sum(amount) AS 'Total amount paid'\
+FROM customer\
+JOIN payment \
+ON customer.customer_id = payment.customer_id\
+GROUP BY 3\
+ORDER BY last_name;}
